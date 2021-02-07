@@ -90,3 +90,22 @@ function start() {
       }
     });
 }
+
+const emp = {
+  view: function () {
+    inquirer
+      .prompt({
+        type: "list",
+        name: "view",
+        message: "Who do you want to view?\n",
+        choices: ["view employees", "view managers"],
+      })
+      .then(function (ans) {
+        if (ans.view === "view employees") {
+          viewDB("employee");
+        } else {
+          viewDB("manager");
+        }
+      });
+  },
+};

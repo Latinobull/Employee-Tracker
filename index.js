@@ -304,6 +304,7 @@ const emp = {
           {
             name: "choice",
             type: "list",
+            message: "\nchoose an employee to delete: ",
             pageSize: 25,
             loop: false,
             choices: function () {
@@ -313,25 +314,24 @@ const emp = {
               }
               return choiceArray;
             },
-            message: "\nchoose an employee to delete: ",
           },
         ])
-        .then(function (answer) {
-          let chosenID;
+        .then(function (ans) {
+          let chosenEmployee;
           for (var i = 0; i < res.length; i++) {
-            if (res[i].id === answer.choice) {
-              chosenID = res[i];
+            if (res[i].first_name + " " + res[i].last_name === ans.choice) {
+              chosenEmployee = res[i];
             }
           }
           connection.query(
             "DELETE FROM employee WHERE id =?",
-            [chosenID],
+            [chosenEmployee.id],
             function (err, res) {
               if (err) throw err;
-              console.log("Employee has been deleted\n");
+              console.log("\nEmployee has been deleted\n");
             }
           );
-          startFunction.run();
+          start();
         });
     });
   },

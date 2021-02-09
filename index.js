@@ -336,3 +336,13 @@ const emp = {
     });
   },
 };
+
+const role = {
+  view: function () {
+    connection.query("SELECT * FROM role", function (err, res) {
+      if (err) throw err;
+      console.log("Here are the Roles");
+      console.table(res);
+    });
+  },
+};

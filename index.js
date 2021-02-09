@@ -59,7 +59,7 @@ function start() {
           emp.delete();
           break;
         case "view roles":
-          viewDB("role");
+          role.view();
           break;
         case "edit roles":
           role.edit();
@@ -71,7 +71,7 @@ function start() {
           role.delete();
           break;
         case "view departments":
-          viewDB("department");
+          dep.view();
           break;
         case "edit departments":
           dep.edit();
@@ -343,6 +343,7 @@ const role = {
       if (err) throw err;
       console.log("Here are the Roles");
       console.table(res);
+      start();
     });
   },
 };

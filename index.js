@@ -346,4 +346,85 @@ const role = {
       start();
     });
   },
+  edit: function () {
+    connection.query("SELECT * FROM role", function (err, res) {
+      if (err) throw err;
+      let roleData = res;
+      connection.query("SELECT * FROM department", function (err, res) {
+        if (err) throw err;
+        let departmentData = res;
+        inquirer
+          .prompt([
+            {
+              name: "choice",
+              type: "list",
+              message: "\nchoose a role to edit: ",
+              pageSize: 25,
+              loop: false,
+              choices: function () {
+                var choiceArray = [];
+                for (var i = 0; i < roleData.length; i++) {
+                  choiceArray.push(roleData[i].title);
+                }
+                return choiceArray;
+              },
+            },
+          ])
+          .then(function (ans) {
+            let chosenRole = {};
+            for (let i = 0; i < roleData.length; i++) {
+              if (roleData[i].title === ans.choice) {
+                chosenRole = roleData[i];
+              }
+            }
+            inquirer
+              .prompt([
+                {
+                  name: "title",
+                  message: "title: ",
+                  type: "input",
+                  default: chosenRole.title,
+                },
+                {
+                  name: "salary",
+                  message: "salary: ",
+                  type: "number",
+                  default: chosenRole.salary,
+                },
+                {
+                  name: "department",
+                  message: "department",
+                  type: "list",
+                  choices: function () {
+                    var choiceArray = [];
+                    for (var i = 0; i < departmentData.length; i++) {
+                      choiceArray.push(departmentData[i].department_name);
+                    }
+                    return choiceArray;
+                  },
+                  default: chosenRole.department_id,
+                },
+              ])
+              .then(function (ans) {
+                // get department id based on user choice
+                let department_answer;
+                for (let i = 0; i < departmentData.length; i++) {
+                  if (ans.department === departmentData[i].department_name) {
+                    department_answer = departmentData[i].id;
+                  }
+                }
+                connection.query(
+                  "UPDATE role SET title=?, salary=?, department_id=? WHERE id=?;",
+                  [ans.title, ans.salary, department_answer, chosenRole.id],
+                  function (err, res) {
+                    if (err) throw err;
+                    console.log(`successfully updated ${chosenRole.title}`);
+                    start();
+                  }
+                );
+              });
+          });
+      });
+    });
+  },
 };

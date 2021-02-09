@@ -183,21 +183,21 @@ const emp = {
                 },
               },
             ])
-            .then(function (answer) {
+            .then(function (ans) {
               // add data to object
               let updateEmployee = {};
-              updateEmployee.first_name = answer.firstname;
-              updateEmployee.last_name = answer.lastname;
+              updateEmployee.first_name = ans.firstname;
+              updateEmployee.last_name = ans.lastname;
               // find role id based on title
               for (let i = 0; i < roleData.length; i++) {
-                if (answer.role === roleData[i].title) {
+                if (ans.role === roleData[i].title) {
                   updateEmployee.role_id = roleData[i].id;
                 }
               }
               // get employee id based on name
               for (let i = 0; i < empData.length; i++) {
                 if (
-                  answer.manager ===
+                  ans.manager ===
                   empData[i].first_name + " " + empData[i].last_name
                 ) {
                   updateEmployee.manager_id = empData[i].id;
@@ -221,6 +221,78 @@ const emp = {
                 }
               );
             });
+        });
+    });
+  },
+  add: function () {
+    connection.query("SELECT * FROM employee", function (err, res) {
+      if (err) throw err;
+      let empData = res;
+
+      let roleData = "";
+      let roleArr = [];
+      // get data from role table
+      connection.query("SELECT * FROM role", function (err, res) {
+        if (err) throw err;
+        roleData = res;
+        for (var i = 0; i < res.length; i++) {
+          roleArr.push(res[i].title);
+        }
+      });
+      inquirer
+        .prompt([
+          { name: "firstname", message: "first name: ", type: "input" },
+          { name: "lastname", message: "last name: ", type: "input" },
+          { name: "role", message: "role: ", type: "list", choices: roleArr },
+          {
+            name: "manager",
+            message: "manager",
+            type: "list",
+            choices: function () {
+              let choiceArray = [];
+              for (var i = 0; i < empData.length; i++) {
+                choiceArray.push(
+                  empData[i].first_name + " " + empData[i].last_name
+                );
+              }
+              return choiceArray;
+            },
+          },
+        ])
+        .then(function (ans) {
+          let updateEmployee = {};
+          updateEmployee.first_name = ans.firstname;
+          updateEmployee.last_name = ans.lastname;
+          // find role id based on title
+          for (let i = 0; i < roleData.length; i++) {
+            if (ans.role === roleData[i].title) {
+              updateEmployee.role_id = roleData[i].id;
+            }
+          }
+          for (let i = 0; i < empData.length; i++) {
+            if (
+              ans.manager ===
+              empData[i].first_name + " " + empData[i].last_name
+            ) {
+              updateEmployee.manager_id = empData[i].id;
+            }
+          }
+          connection.query(
+            "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?);",
+            [
+              updateEmployee.first_name,
+              updateEmployee.last_name,
+              updateEmployee.role_id,
+              updateEmployee.manager_id,
+            ],
+            function (err, res) {
+              if (err) throw err;
+              console.log(
+                `successfully added employee ${updateEmployee.first_name} ${updateEmployee.last_name}`
+              );
+              start();
+            }
+          );
         });
     });
   },

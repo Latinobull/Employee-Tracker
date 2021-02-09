@@ -93,25 +93,22 @@ function start() {
 
 const emp = {
   view: function () {
-    inquirer
-      .prompt({
-        type: "list",
-        name: "view",
-        message: "Who do you want to view?\n",
-        pageSize: 25,
-        choices: ["view employees", "view managers"],
-      })
-      .then(function (ans) {
-        if (ans.view === "view employees") {
-          viewDB("employee");
-        } else {
-          viewDB("manager");
-        }
-      });
+    connection.query(
+      `SELECT employee.id, CONCAT(employee.first_name, " ", employee.last_name) as employee_name, role.title as role,
+           CONCAT(manager.first_name, " ", manager.last_name) as manager_name
+          FROM employee INNER JOIN role ON employee.role_id = role.id LEFT JOIN employee AS manager on employee.manager_id = manager.id`,
+      function (err, res) {
+        if (err) throw err;
+        console.log("Here are your employees");
+        console.table(res);
+        start();
+      }
+    );
   },
   edit: function () {
     connection.query("SELECT * FROM employee", function (err, res) {
       if (err) throw err;
+      let empData = res;
 
       console.log(res);
       inquirer
@@ -137,24 +134,94 @@ const emp = {
           for (var i = 0; i < res.length; i++) {
             if (res[i].first_name + " " + res[i].last_name === ans.choice) {
               userChoice = res[i];
-              console.log("You Choose " + userChoice);
+              console.log("You Choose " + JSON.stringify(userChoice));
             }
           }
+          let roleData = "";
+          let roleArr = [];
+          // get data from role table
+          connection.query("SELECT * FROM role", function (err, res) {
+            if (err) throw err;
+            roleData = res;
+            for (var i = 0; i < res.length; i++) {
+              roleArr.push(res[i].title);
+            }
+          });
+
+          inquirer
+            .prompt([
+              {
+                name: "firstname",
+                message: "\nfirst name: ",
+                type: "input",
+                default: userChoice.first_name,
+              },
+              {
+                name: "lastname",
+                message: "last name: ",
+                type: "input",
+                default: userChoice.last_name,
+              },
+              {
+                name: "role",
+                message: "role: ",
+                type: "list",
+                choices: roleArr,
+              },
+              {
+                name: "manager",
+                message: "select manager: ",
+                type: "list",
+                choices: function () {
+                  let choiceArray = [];
+                  for (var i = 0; i < empData.length; i++) {
+                    choiceArray.push(
+                      empData[i].first_name + " " + empData[i].last_name
+                    );
+                  }
+                  return choiceArray;
+                },
+              },
+            ])
+            .then(function (answer) {
+              // add data to object
+              let updateEmployee = {};
+              updateEmployee.first_name = answer.firstname;
+              updateEmployee.last_name = answer.lastname;
+              // find role id based on title
+              for (let i = 0; i < roleData.length; i++) {
+                if (answer.role === roleData[i].title) {
+                  updateEmployee.role_id = roleData[i].id;
+                }
+              }
+              // get employee id based on name
+              for (let i = 0; i < empData.length; i++) {
+                if (
+                  answer.manager ===
+                  empData[i].first_name + " " + empData[i].last_name
+                ) {
+                  updateEmployee.manager_id = empData[i].id;
+                }
+              }
+              connection.query(
+                "UPDATE employee SET first_name=?, last_name=?, role_id=?, manager_id=? WHERE id=?;",
+                [
+                  updateEmployee.first_name,
+                  updateEmployee.last_name,
+                  updateEmployee.role_id,
+                  updateEmployee.manager_id,
+                  userChoice.id,
+                ],
+                function (err, res) {
+                  if (err) throw err;
+                  console.log(
+                    `successfully updated employee ${updateEmployee.first_name} ${updateEmployee.last_name}`
+                  );
+                  start();
+                }
+              );
+            });
         });
     });
   },
 };
-
-function viewDB() {
-  connection.query(
-    `SELECT employee.id, CONCAT(employee.first_name, " ", employee.last_name) as employee_name, role.title as role,
-         CONCAT(manager.first_name, " ", manager.last_name) as manager_name
-        FROM employee INNER JOIN role ON employee.role_id = role.id LEFT JOIN employee AS manager on employee.manager_id = manager.id`,
-    function (err, res) {
-      if (err) throw err;
-      console.log("Here are your employees");
-      console.table(res);
-      start();
-    }
-  );
-}

@@ -98,6 +98,7 @@ const emp = {
         type: "list",
         name: "view",
         message: "Who do you want to view?\n",
+        pageSize: 25,
         choices: ["view employees", "view managers"],
       })
       .then(function (ans) {
@@ -109,3 +110,17 @@ const emp = {
       });
   },
 };
+
+function viewDB() {
+  connection.query(
+    `SELECT employee.id, CONCAT(employee.first_name, " ", employee.last_name) as employee_name, role.title as role,
+         CONCAT(manager.first_name, " ", manager.last_name) as manager_name
+        FROM employee INNER JOIN role ON employee.role_id = role.id LEFT JOIN employee AS manager on employee.manager_id = manager.id`,
+    function (err, res) {
+      if (err) throw err;
+      console.log("Here are your employees");
+      console.table(res);
+      start();
+    }
+  );
+}

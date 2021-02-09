@@ -23,12 +23,12 @@ INSERT INTO role (department_id, title, salary) VALUES
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES
 -- regular
-("Jeremiah", "Vega", 1, 1)
-("Johnny", "Perez", 2,2)
-("Amelia", "Lopez", 3, 3)
-("Shelly", "Landrau", 4,4)
+("Jeremiah", "Vega", 1, 5),
+("Johnny", "Perez", 2, 6),
+("Amelia", "Lopez", 3, 7),
+("Shelly", "Landrau", 4, 8),
 -- managers
-("Donnahue", "George", 11, NULL)
-("Caroline", "Lynch", 12, NULL)
-("Fiach", "Hill", 13, NULL)
-("Alex", "Wooley", 14, NULL)
+("Donnahue", "George", 5, NULL),
+("Caroline", "Lynch", 6, NULL),
+("Fiach", "Hill", 7, NULL),
+("Alex", "Wooley", 8, NULL)

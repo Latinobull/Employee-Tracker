@@ -114,23 +114,33 @@ const emp = {
       if (err) throw err;
 
       console.log(res);
-      inquirer.prompt([
-        {
-          type: "list",
-          name: "choice",
-          message: "choose an employee to edit\n",
-          pageSize: 20,
-          loop: false,
-          choices: function () {
-            var choiceArray = [];
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "choice",
+            message: "choose an employee to edit\n",
+            pageSize: 20,
+            loop: false,
+            choices: function () {
+              var choiceArray = [];
 
-            for (var i = 0; i < res.length; i++) {
-              choiceArray.push(res[i].first_name + " " + res[i].last_name);
-            }
-            return choiceArray;
+              for (var i = 0; i < res.length; i++) {
+                choiceArray.push(res[i].first_name + " " + res[i].last_name);
+              }
+              return choiceArray;
+            },
           },
-        },
-      ]);
+        ])
+        .then(function (ans) {
+          let userChoice;
+          for (var i = 0; i < res.length; i++) {
+            if (res[i].first_name + " " + res[i].last_name === ans.choice) {
+              userChoice = res[i];
+              console.log("You Choose " + userChoice);
+            }
+          }
+        });
     });
   },
 };

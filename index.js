@@ -109,6 +109,30 @@ const emp = {
         }
       });
   },
+  edit: function () {
+    connection.query("SELECT * FROM employee", function (err, res) {
+      if (err) throw err;
+
+      console.log(res);
+      inquirer.prompt([
+        {
+          type: "list",
+          name: "choice",
+          message: "choose an employee to edit\n",
+          pageSize: 20,
+          loop: false,
+          choices: function () {
+            var choiceArray = [];
+
+            for (var i = 0; i < res.length; i++) {
+              choiceArray.push(res[i].first_name + " " + res[i].last_name);
+            }
+            return choiceArray;
+          },
+        },
+      ]);
+    });
+  },
 };
 
 function viewDB() {

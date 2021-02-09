@@ -296,4 +296,43 @@ const emp = {
         });
     });
   },
+  delete: function () {
+    connection.query("SELECT * FROM employee", function (err, res) {
+      if (err) throw err;
+      inquirer
+        .prompt([
+          {
+            name: "choice",
+            type: "list",
+            pageSize: 25,
+            loop: false,
+            choices: function () {
+              var choiceArray = [];
+              for (var i = 0; i < res.length; i++) {
+                choiceArray.push(res[i].first_name + " " + res[i].last_name);
+              }
+              return choiceArray;
+            },
+            message: "\nchoose an employee to delete: ",
+          },
+        ])
+        .then(function (answer) {
+          let chosenID;
+          for (var i = 0; i < res.length; i++) {
+            if (res[i].id === answer.choice) {
+              chosenID = res[i];
+            }
+          }
+          connection.query(
+            "DELETE FROM employee WHERE id =?",
+            [chosenID],
+            function (err, res) {
+              if (err) throw err;
+              console.log("Employee has been deleted\n");
+            }
+          );
+          startFunction.run();
+        });
+    });
+  },
 };

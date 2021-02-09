@@ -352,7 +352,7 @@ const role = {
       let roleData = res;
       connection.query("SELECT * FROM department", function (err, res) {
         if (err) throw err;
-        let departmentData = res;
+        let depData = res;
         inquirer
           .prompt([
             {
@@ -397,8 +397,8 @@ const role = {
                   type: "list",
                   choices: function () {
                     var choiceArray = [];
-                    for (var i = 0; i < departmentData.length; i++) {
-                      choiceArray.push(departmentData[i].department_name);
+                    for (var i = 0; i < depData.length; i++) {
+                      choiceArray.push(depData[i].department_name);
                     }
                     return choiceArray;
                   },
@@ -407,15 +407,15 @@ const role = {
               ])
               .then(function (ans) {
                 // get department id based on user choice
-                let department_answer;
-                for (let i = 0; i < departmentData.length; i++) {
-                  if (ans.department === departmentData[i].department_name) {
-                    department_answer = departmentData[i].id;
+                let dep_ans;
+                for (let i = 0; i < depData.length; i++) {
+                  if (ans.department === depData[i].department_name) {
+                    dep_ans = depData[i].id;
                   }
                 }
                 connection.query(
                   "UPDATE role SET title=?, salary=?, department_id=? WHERE id=?;",
-                  [ans.title, ans.salary, department_answer, chosenRole.id],
+                  [ans.title, ans.salary, dep_ans, chosenRole.id],
                   function (err, res) {
                     if (err) throw err;
                     console.log(`successfully updated ${chosenRole.title}`);
@@ -425,6 +425,52 @@ const role = {
               });
           });
       });
+    });
+  },
+  add: function () {
+    console.log(`\nAdd new role:\n`);
+    connection.query("SELECT * FROM department", function (err, res) {
+      if (err) throw err;
+      let depData = res;
+      inquirer
+        .prompt([
+          {
+            name: "title",
+            message: "title: ",
+            type: "input",
+          },
+          { name: "salary", message: "salary: ", type: "number" },
+          {
+            name: "department",
+            message: "department: ",
+            type: "list",
+            pageSize: 20,
+            choices: function () {
+              var choiceArray = [];
+              for (var i = 0; i < res.length; i++) {
+                choiceArray.push(res[i].department_name);
+              }
+              return choiceArray;
+            },
+          },
+        ])
+        .then(function (ans) {
+          let department_id = 0;
+          for (let i = 0; i < depData.length; i++) {
+            if (ans.department === depData[i].department_name) {
+              department_id = depData[i].id;
+            }
+          }
+          connection.query(
+            "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",
+            [ans.title, ans.salary, department_id],
+            function (err, res) {
+              if (err) throw err;
+              console.log(`successfully added new role ${ans.title}`);
+              start();
+            }
+          );
+        });
     });
   },
 };

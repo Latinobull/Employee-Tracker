@@ -42,6 +42,8 @@ function start() {
         "delete departments",
         new inquirer.Separator("\n-------Budget-------"),
         "view budget",
+        new inquirer.Separator("\n Finished"),
+        "\nFinished with my Employee Tracker",
       ],
     })
     .then(function (ans) {

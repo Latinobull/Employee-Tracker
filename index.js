@@ -636,3 +636,14 @@ const dep = {
     });
   },
 };
+
+function budget() {
+  connection.query(
+    "SELECT SUM(role.salary) budget FROM role INNER JOIN employee ON role.id = employee.role_id;",
+    function (err, res) {
+      if (err) throw err;
+      console.log(`\nTotal budget is: ${res[0].budget}`);
+      start();
+    }
+  );
+}

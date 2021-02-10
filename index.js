@@ -513,3 +513,14 @@ const role = {
     });
   },
 };
+
+const dep = {
+  view: function () {
+    connection.query("SELECT * FROM department", function (err, res) {
+      if (err) throw err;
+      console.log("Here are the Departments");
+      console.table(res);
+      start();
+    });
+  },
+};

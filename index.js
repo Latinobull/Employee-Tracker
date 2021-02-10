@@ -596,4 +596,43 @@ const dep = {
         );
       });
   },
+  delete: function () {
+    connection.query("SELECT * FROM department", function (err, res) {
+      if (err) throw err;
+      inquirer
+        .prompt([
+          {
+            name: "choice",
+            type: "list",
+            message: "\nchoose an department to delete: ",
+            pageSize: 16,
+            loop: false,
+            choices: function () {
+              var choiceArray = [];
+              for (var i = 0; i < res.length; i++) {
+                choiceArray.push(res[i].department_name);
+              }
+              return choiceArray;
+            },
+          },
+        ])
+        .then(function (ans) {
+          let chosenRole;
+          for (var i = 0; i < res.length; i++) {
+            if (res[i].department_name === ans.choice) {
+              chosenRole = res[i];
+            }
+          }
+          connection.query(
+            "DELETE FROM department WHERE id =?",
+            [chosenRole.id],
+            function (err, res) {
+              if (err) throw err;
+              console.log("\nRole has been deleted\n");
+            }
+          );
+          start();
+        });
+    });
+  },
 };

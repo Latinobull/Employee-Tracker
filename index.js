@@ -523,6 +523,58 @@ const dep = {
       start();
     });
   },
+  edit: function () {
+    connection.query("SELECT * FROM department", function (err, res) {
+      if (err) throw err;
+      let depData = res;
+      inquirer
+        .prompt([
+          {
+            name: "choice",
+            type: "list",
+            loop: false,
+            choices: function () {
+              var choiceArray = [];
+              for (var i = 0; i < res.length; i++) {
+                choiceArray.push(res[i].department_name);
+              }
+              return choiceArray;
+            },
+            message: "\nchoose a department to edit: ",
+          },
+        ])
+        .then(function (ans) {
+          let chosenDep;
+          for (let i = 0; i < depData.length; i++) {
+            if (depData[i].department_name === ans.choice) {
+              chosenDep = depData[i];
+            }
+          }
+          inquirer
+            .prompt([
+              {
+                name: "name",
+                message: "department name: ",
+                default: chosenDep.department_name,
+                type: "input",
+              },
+            ])
+            .then(function (ans) {
+              connection.query(
+                "UPDATE department SET department_name=? WHERE id=?;",
+                [ans.name, chosenDep.id],
+                function (err, res) {
+                  if (err) throw err;
+                  console.log(
+                    `successfully updated ${chosenDep.department_name}`
+                  );
+                  start();
+                }
+              );
+            });
+        });
+    });
+  },
   add: function () {
     inquirer
       .prompt([

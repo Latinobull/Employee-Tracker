@@ -523,4 +523,25 @@ const dep = {
       start();
     });
   },
+  add: function () {
+    inquirer
+      .prompt([
+        {
+          name: "name",
+          message: "What is the new Department name?",
+          type: "input",
+        },
+      ])
+      .then(function (ans) {
+        connection.query(
+          "INSERT INTO department (department_name) VALUES (?)",
+          [ans.name],
+          function (err, res) {
+            if (err) throw err;
+            console.log(`The ${ans.name} Department has been added!`);
+            start();
+          }
+        );
+      });
+  },
 };

@@ -473,4 +473,43 @@ const role = {
         });
     });
   },
+  delete: function () {
+    connection.query("SELECT * FROM role", function (err, res) {
+      if (err) throw err;
+      inquirer
+        .prompt([
+          {
+            name: "choice",
+            type: "list",
+            message: "\nchoose an role to delete: ",
+            pageSize: 16,
+            loop: false,
+            choices: function () {
+              var choiceArray = [];
+              for (var i = 0; i < res.length; i++) {
+                choiceArray.push(res[i].title);
+              }
+              return choiceArray;
+            },
+          },
+        ])
+        .then(function (ans) {
+          let chosenRole;
+          for (var i = 0; i < res.length; i++) {
+            if (res[i].title === ans.choice) {
+              chosenRole = res[i];
+            }
+          }
+          connection.query(
+            "DELETE FROM role WHERE id =?",
+            [chosenRole.id],
+            function (err, res) {
+              if (err) throw err;
+              console.log("\nRole has been deleted\n");
+            }
+          );
+          start();
+        });
+    });
+  },
 };
